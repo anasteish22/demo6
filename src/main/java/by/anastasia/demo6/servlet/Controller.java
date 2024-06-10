@@ -15,7 +15,7 @@ public class Controller extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        response.setContentType("text/html"); //устанавливаем тип ответа
+        response.setContentType("text/html");
 //        String strNum = request.getParameter("number");
 //        int resNum = 2 * Integer.parseInt(strNum);
 //        request.setAttribute("result", resNum);
