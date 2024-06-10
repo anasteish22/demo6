@@ -1,9 +1,9 @@
-package com.example.demo6.command;
+package by.anastasia.demo6.command;
 
-import com.example.demo6.command.impl.AddUserCommand;
-import com.example.demo6.command.impl.DefaultCommand;
-import com.example.demo6.command.impl.LoginCommand;
-import com.example.demo6.command.impl.LogoutCommand;
+import by.anastasia.demo6.command.impl.AddUserCommand;
+import by.anastasia.demo6.command.impl.DefaultCommand;
+import by.anastasia.demo6.command.impl.LoginCommand;
+import by.anastasia.demo6.command.impl.LogoutCommand;
 
 public enum CommandType {
     ADDUSER(new AddUserCommand()),

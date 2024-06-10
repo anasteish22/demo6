@@ -1,8 +1,8 @@
-package com.example.demo6.dao.impl;
+package by.anastasia.demo6.dao.impl;
 
-import com.example.demo6.dao.UserDao;
-import com.example.demo6.model.User;
-import com.example.demo6.pool.ConnectionPool;
+import by.anastasia.demo6.dao.UserDao;
+import by.anastasia.demo6.model.User;
+import by.anastasia.demo6.pool.ConnectionPool;
 
 import java.sql.*;
 

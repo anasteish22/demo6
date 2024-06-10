@@ -1,4 +1,4 @@
-package com.example.demo6.model;
+package by.anastasia.demo6.model;
 
 public class User {
     private int id;

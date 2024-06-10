@@ -1,4 +1,4 @@
-package com.example.demo6.command;
+package by.anastasia.demo6.command;
 
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -1,9 +1,9 @@
-package com.example.demo6.servlet;
+package by.anastasia.demo6.servlet;
 
 import java.io.*;
 
-import com.example.demo6.command.Command;
-import com.example.demo6.command.CommandType;
+import by.anastasia.demo6.command.Command;
+import by.anastasia.demo6.command.CommandType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;

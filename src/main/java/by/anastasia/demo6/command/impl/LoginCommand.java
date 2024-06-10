@@ -1,8 +1,8 @@
-package com.example.demo6.command.impl;
+package by.anastasia.demo6.command.impl;
 
-import com.example.demo6.command.Command;
-import com.example.demo6.service.UserService;
-import com.example.demo6.service.impl.UserServiceImpl;
+import by.anastasia.demo6.command.Command;
+import by.anastasia.demo6.service.UserService;
+import by.anastasia.demo6.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class LoginCommand implements Command {

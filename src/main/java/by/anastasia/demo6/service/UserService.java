@@ -1,6 +1,6 @@
-package com.example.demo6.service;
+package by.anastasia.demo6.service;
 
-import com.example.demo6.model.User;
+import by.anastasia.demo6.model.User;
 
 public interface UserService {
     boolean authenticate(String login, String password);
