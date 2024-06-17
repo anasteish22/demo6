@@ -13,7 +13,7 @@
 <body>
 Hello ${user}
 <br/>
-<form action="adduser.do" method="get">
+<form action="add_user.do" method="get">
     Login : <input type="text" name="login"/>
     <br/>
     Password: <input type="password" name="password"/>

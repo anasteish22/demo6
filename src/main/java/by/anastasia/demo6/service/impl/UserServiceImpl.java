@@ -2,8 +2,11 @@ package by.anastasia.demo6.service.impl;
 
 import by.anastasia.demo6.dao.UserDao;
 import by.anastasia.demo6.dao.impl.UserDaoImpl;
+import by.anastasia.demo6.exception.DaoException;
 import by.anastasia.demo6.model.User;
 import by.anastasia.demo6.service.UserService;
+
+import java.util.List;
 
 public class UserServiceImpl implements UserService {
     private UserDao userDao = new UserDaoImpl();
@@ -16,5 +19,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean saveUser(User user) {
         return userDao.save(user);
+    }
+
+    @Override
+    public List<User> viewAll() {
+        return userDao.findAll();
     }
 }

@@ -4,6 +4,7 @@ import java.io.*;
 
 import by.anastasia.demo6.command.Command;
 import by.anastasia.demo6.command.CommandType;
+import by.anastasia.demo6.exception.DaoException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -16,15 +17,15 @@ public class Controller extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         response.setContentType("text/html");
-//        String strNum = request.getParameter("number");
-//        int resNum = 2 * Integer.parseInt(strNum);
-//        request.setAttribute("result", resNum);
-        String query = request.getRequestURI();
-        query = query.split("/")[2];
-        query = query.split("\\.")[0];
-        request.setAttribute("queryStr", query);
-        Command command = CommandType.define(query);
-        String page = command.execute(request);
+        String uriPart = CommandType.requestUri(request);
+        request.setAttribute("uriPart", uriPart);
+        Command command = CommandType.define(uriPart);
+        String page;
+        try {
+            page = command.execute(request);
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
+        }
         request.getRequestDispatcher(page).forward(request, response);
     }
 

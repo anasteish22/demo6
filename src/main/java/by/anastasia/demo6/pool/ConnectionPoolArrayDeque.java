@@ -3,19 +3,24 @@ package by.anastasia.demo6.pool;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayDeque;
 import java.util.Properties;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class ConnectionPool {
-    private BlockingQueue<Connection> connections = new LinkedBlockingQueue<>(4);
-    private static ConnectionPool instance;
+public class ConnectionPoolArrayDeque {
+    private static ConnectionPoolArrayDeque instance;
+    private static final int POOL_SIZE = 4;
+    private ArrayDeque<ProxyConnection> freeConnections = new ArrayDeque<>(POOL_SIZE);
+    private static Lock lock = new ReentrantLock(true);
+    private static Condition condition = lock.newCondition();
 
-    private ConnectionPool() {
+    private ConnectionPoolArrayDeque() {
         try {
             DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         } catch (SQLException e) {
-            throw new RuntimeException(e); //fixme
+            throw new ExceptionInInitializerError(e);
         }
 
         String url = "jdbc:mysql://localhost:3306/usersdb";
@@ -31,22 +36,26 @@ public class ConnectionPool {
         properties.put("serverTimezone", "UTC");
         properties.put("serverSslCert", "classpath:server.crt");
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < POOL_SIZE; i++) {
             try {
                 Connection connection = DriverManager.getConnection(url, properties);
-                connections.put(connection);
-            } catch (SQLException | InterruptedException e) {
-                throw new RuntimeException(e); //fixme
+                ProxyConnection proxyConnection = new ProxyConnection(connection);
+                freeConnections.add(proxyConnection);
+            } catch (SQLException e) {
+                throw new ExceptionInInitializerError(e);
             }
         }
     }
 
-    public static ConnectionPool getInstance() {
+    public static ConnectionPoolArrayDeque getInstance() {
         if (instance == null) {
-            synchronized (ConnectionPool.class) {
+            try {
+                lock.lock();
                 if (instance == null) {
-                    instance = new ConnectionPool();
+                    instance = new ConnectionPoolArrayDeque();
                 }
+            } finally {
+                lock.unlock();
             }
         }
         return instance;
@@ -55,26 +64,25 @@ public class ConnectionPool {
     public Connection getConnection() {
         Connection connection;
         try {
-            connection = connections.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e); //fixme
+            lock.lock();
+            connection = freeConnections.poll();
+        } finally {
+            lock.unlock();
         }
         return connection;
     }
 
-    public void releaseConnection(Connection connection) {
-        try {
-            connections.put(connection);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e); //fixme
+    public void release(Connection connection) {
+        if (connection instanceof ProxyConnection proxyConnection) {
+            freeConnections.push(proxyConnection);
         }
     }
 
     public void closePool() {
-        for (int i = 0; i < connections.size(); i++) {
+        for (int i = 0; i < POOL_SIZE; i++) {
             try {
-                connections.take().close();
-            } catch (SQLException | InterruptedException e) {
+                freeConnections.peek().close();
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
