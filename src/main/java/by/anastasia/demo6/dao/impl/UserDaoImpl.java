@@ -1,10 +1,14 @@
 package by.anastasia.demo6.dao.impl;
 
+import by.anastasia.demo6.command.ParameterRequest;
+import by.anastasia.demo6.dao.ColumnName;
 import by.anastasia.demo6.dao.UserDao;
 import by.anastasia.demo6.dao.mapper.impl.UserMapper;
+import by.anastasia.demo6.exception.ConnectionException;
 import by.anastasia.demo6.exception.DaoException;
 import by.anastasia.demo6.model.User;
 import by.anastasia.demo6.pool.ConnectionPool;
+import by.anastasia.demo6.pool.ConnectionPoolArrayDeque;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,25 +16,27 @@ import java.util.List;
 
 public class UserDaoImpl implements UserDao {
     private static final String SELECT_BY_LOGIN = "SELECT password FROM users WHERE login = ?";
-    private static final String ADD_USER = "INSERT INTO users (login, password) values (?, ?)";
-    private static final String FIND_ALL_USERS = "SELECT id, login, password FROM phones";
-
+    private static final String ADD_USER = "INSERT INTO users (first_name, last_name, login, password, phone_number) values (?, ?, ?, ?, ?)";
+    private static final String FIND_ALL_USERS = "SELECT id, first_name, last_name, login, password, phone_number FROM users";
+    private static final String SELECT_LOGINS = "SELECT login FROM users";
+    private static final String SELECT_PHONES = "SELECT phone_number FROM users";
     @Override
-    public boolean login(String login, String password) {
+    public boolean login(String login, String password) throws DaoException, ConnectionException {
         boolean match = false;
-        Connection connection = ConnectionPool.getInstance().getConnection();
+        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
+            connection = ConnectionPoolArrayDeque.getInstance().getConnection();
             statement = connection.prepareStatement(SELECT_BY_LOGIN);
             statement.setString(1, login);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                String pass = resultSet.getString("password");
+                String pass = resultSet.getString(ColumnName.USERS_PASSWORD);
                 match = password.equals(pass);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException | ConnectionException e) {
+            throw new DaoException(e);
         } finally {
             close(statement);
             close(resultSet);
@@ -41,36 +47,88 @@ public class UserDaoImpl implements UserDao {
 
 
     @Override
-    public boolean save(User user) {
+    public boolean save(User user) throws DaoException, ConnectionException {
         boolean done = false;
-        Connection connection = ConnectionPool.getInstance().getConnection();
-        PreparedStatement statement = null;
+        Connection connection = null;
+        PreparedStatement statementAdd = null;
         try {
-            statement = connection.prepareStatement(ADD_USER);
-            statement.setString(1, user.getLogin());
-            statement.setString(2, user.getPassword());
-            done = statement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); //todo
+            connection = ConnectionPoolArrayDeque.getInstance().getConnection();
+            statementAdd = connection.prepareStatement(ADD_USER);
+
+            if (!hasLogin(connection, user.getLogin()) && !hasPhone(connection, user.getPhoneNumber())) {
+                statementAdd.setString(1, user.getFirstName());
+                statementAdd.setString(2, user.getLastName());
+                statementAdd.setString(3, user.getLogin());
+                statementAdd.setString(4, user.getPassword());
+                statementAdd.setString(5, user.getPhoneNumber());
+                statementAdd.execute();
+                done = true;
+            }
+        } catch (SQLException | ConnectionException e) {
+            throw new DaoException(e);
         } finally {
-            close(statement);
+            close(statementAdd);
             close(connection);
         }
         return done;
     }
 
+    private boolean hasLogin(Connection connection, String login) throws DaoException {
+        boolean hasLogin = false;
+        try {
+            PreparedStatement statement = connection.prepareStatement(SELECT_LOGINS);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String log = resultSet.getString(ColumnName.USERS_LOGIN);
+                hasLogin = login.equals(log);
+                if (hasLogin) {
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+            return hasLogin;
+    }
+
+    private boolean hasPhone(Connection connection, String phone) throws DaoException {
+        boolean hasPhone = false;
+        try {
+            PreparedStatement statement = connection.prepareStatement(SELECT_PHONES);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String ph = resultSet.getString(ColumnName.USERS_PHONE);
+                hasPhone = phone.equals(ph);
+                if (hasPhone) {
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+        return hasPhone;
+    }
+
     @Override
-    public List<User> findAll() {
+    public List<User> findAll() throws DaoException, ConnectionException {
         List<User> users = new ArrayList<>();
-        try (Connection connection = ConnectionPool.getInstance().getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(FIND_ALL_USERS)) {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = ConnectionPoolArrayDeque.getInstance().getConnection();
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(FIND_ALL_USERS);
             while (resultSet.next()) {
                 User user = new UserMapper().mapper(resultSet);
                 users.add(user);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException | ConnectionException e) {
+            throw new DaoException(e);
+        } finally {
+            close(statement);
+            close(resultSet);
+            close(connection);
         }
         return users;
     }

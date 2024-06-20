@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: afran
-  Date: 6/10/2024
-  Time: 4:55 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -12,5 +5,11 @@
 </head>
 <body>
 Ok!!!
+<form action="logout.do" method="get">
+    <input type="submit" value="Log out">
+</form>
+<form action="view_all_users.do" method="get">
+    <input type="submit" name="submit" value="All users">
+</form>
 </body>
 </html>

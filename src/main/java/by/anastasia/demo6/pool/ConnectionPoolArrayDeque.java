@@ -1,5 +1,7 @@
 package by.anastasia.demo6.pool;
 
+import by.anastasia.demo6.exception.ConnectionException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,7 +18,7 @@ public class ConnectionPoolArrayDeque {
     private static Lock lock = new ReentrantLock(true);
     private static Condition condition = lock.newCondition();
 
-    private ConnectionPoolArrayDeque() {
+    private ConnectionPoolArrayDeque() throws ConnectionException {
         try {
             DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         } catch (SQLException e) {
@@ -26,7 +28,7 @@ public class ConnectionPoolArrayDeque {
         String url = "jdbc:mysql://localhost:3306/usersdb";
         Properties properties = new Properties();
         properties.put("user", "root");
-        properties.put("password", "");
+        properties.put("password", "fmaptu628A");
         properties.put("autoReconnect", "true");
         properties.put("characterEncoding", "UTF-8");
         properties.put("useUnicode", "true");
@@ -42,12 +44,12 @@ public class ConnectionPoolArrayDeque {
                 ProxyConnection proxyConnection = new ProxyConnection(connection);
                 freeConnections.add(proxyConnection);
             } catch (SQLException e) {
-                throw new ExceptionInInitializerError(e);
+                throw new ConnectionException(e);
             }
         }
     }
 
-    public static ConnectionPoolArrayDeque getInstance() {
+    public static ConnectionPoolArrayDeque getInstance() throws ConnectionException {
         if (instance == null) {
             try {
                 lock.lock();

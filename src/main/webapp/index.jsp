@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSP - Hello World</title>
+    <title>Start page</title>
+    <h1>Log in</h1>
 </head>
 <body>
 <br/>
@@ -12,9 +13,15 @@
     <br/>
     Password: <input type="password" name="password"/>
     <br/>
-    <input type="submit" name="submit" value="Push"/>
+    <br/>
+    <input type="submit" name="submit" value="Log in"/>
     <br/>
     ${login_msg}
+</form>
+Don't have an account?
+<a href="sign_up.jsp">Sign up</a>
+<form action="view_all_users.do" method="get">
+    <input type="submit" name="submit" value="All users">
 </form>
 </body>
 </html>

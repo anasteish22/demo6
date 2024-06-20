@@ -4,7 +4,9 @@ import java.io.*;
 
 import by.anastasia.demo6.command.Command;
 import by.anastasia.demo6.command.CommandType;
+import by.anastasia.demo6.exception.CommandException;
 import by.anastasia.demo6.exception.DaoException;
+import by.anastasia.demo6.exception.ServiceException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -23,7 +25,7 @@ public class Controller extends HttpServlet {
         String page;
         try {
             page = command.execute(request);
-        } catch (DaoException e) {
+        } catch (DaoException | CommandException | ServiceException e) {
             throw new RuntimeException(e);
         }
         request.getRequestDispatcher(page).forward(request, response);

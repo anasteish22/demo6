@@ -13,14 +13,8 @@
 <body>
 Hello ${user}
 <br/>
-<form action="add_user.do" method="get">
-    Login : <input type="text" name="login"/>
-    <br/>
-    Password: <input type="password" name="password"/>
-    <br/>
-    <input type="submit" name="submit" value="Push"/>
-    <br/>
-    ${login_msg}
+<form action="logout.do" method="get">
+    <input type="submit" value="Log out">
 </form>
 </body>
 </html>

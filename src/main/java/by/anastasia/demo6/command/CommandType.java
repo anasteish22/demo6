@@ -6,9 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 public enum CommandType {
-    ADD_USER(new AddUserCommand()),
-    LOGIN(new LoginCommand()),
-    LOGOUT(new LogoutCommand()),
+    SIGN_UP(new SignUpCommand()),
+    LOGIN(new LogInCommand()),
+    LOGOUT(new LogOutCommand()),
     VIEW_ALL_USERS(new ViewAllUsersCommand()),
     DEFAULT(new DefaultCommand());
     Command command;

@@ -1,5 +1,7 @@
 package by.anastasia.demo6.pool;
 
+import by.anastasia.demo6.exception.ConnectionException;
+
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -61,7 +63,11 @@ class ProxyConnection implements Connection {
 
     @Override
     public void close() throws SQLException {
-        ConnectionPoolArrayDeque.getInstance().release(this);
+        try {
+            ConnectionPoolArrayDeque.getInstance().release(this);
+        } catch (ConnectionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

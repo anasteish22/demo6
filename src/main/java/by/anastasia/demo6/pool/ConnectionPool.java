@@ -1,21 +1,25 @@
 package by.anastasia.demo6.pool;
 
+import by.anastasia.demo6.exception.ConnectionException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConnectionPool {
     private BlockingQueue<Connection> connections = new LinkedBlockingQueue<>(4);
+    private static AtomicBoolean isCreated = new AtomicBoolean(false);
     private static ConnectionPool instance;
 
-    private ConnectionPool() {
+    private ConnectionPool() throws ConnectionException {
         try {
             DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         } catch (SQLException e) {
-            throw new RuntimeException(e); //fixme
+            throw new ConnectionException(e);
         }
 
         String url = "jdbc:mysql://localhost:3306/usersdb";
@@ -36,46 +40,42 @@ public class ConnectionPool {
                 Connection connection = DriverManager.getConnection(url, properties);
                 connections.put(connection);
             } catch (SQLException | InterruptedException e) {
-                throw new RuntimeException(e); //fixme
+                throw new ConnectionException(e);
             }
         }
     }
 
-    public static ConnectionPool getInstance() {
-        if (instance == null) {
-            synchronized (ConnectionPool.class) {
-                if (instance == null) {
-                    instance = new ConnectionPool();
-                }
-            }
+    public static ConnectionPool getInstance() throws ConnectionException {
+        if (isCreated.compareAndSet(false, true)) {
+            instance = new ConnectionPool();
         }
         return instance;
     }
 
-    public Connection getConnection() {
+    public Connection getConnection() throws ConnectionException {
         Connection connection;
         try {
             connection = connections.take();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e); //fixme
+            throw new ConnectionException(e);
         }
         return connection;
     }
 
-    public void releaseConnection(Connection connection) {
+    public void releaseConnection(Connection connection) throws ConnectionException {
         try {
             connections.put(connection);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e); //fixme
+            throw new ConnectionException(e);
         }
     }
 
-    public void closePool() {
+    public void closePool() throws ConnectionException {
         for (int i = 0; i < connections.size(); i++) {
             try {
                 connections.take().close();
             } catch (SQLException | InterruptedException e) {
-                throw new RuntimeException(e);
+                throw new ConnectionException(e);
             }
         }
         deregisterDrivers();
