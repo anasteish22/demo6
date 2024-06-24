@@ -28,7 +28,7 @@ public class ConnectionPoolArrayDeque {
         String url = "jdbc:mysql://localhost:3306/usersdb";
         Properties properties = new Properties();
         properties.put("user", "root");
-        properties.put("password", "fmaptu628A");
+        properties.put("password", "");
         properties.put("autoReconnect", "true");
         properties.put("characterEncoding", "UTF-8");
         properties.put("useUnicode", "true");
